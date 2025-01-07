@@ -12,10 +12,14 @@ namespace LawnRobot
 {
     public sealed partial class MainWindow : Window
     {
+        public Lawn CurrentLawn { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
             //Window.Current.AppWindow.Resize(new SizeInt32(1000, 750));
+
+            CurrentLawn = LawnGenerator.BuildLawn();
         }
 
         private void OnRandomizeClicked(object sender, RoutedEventArgs args)

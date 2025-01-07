@@ -68,7 +68,6 @@
                             Grid.Row="4"
                             Grid.Column="1"
                             Source="ms-appx:///Assets/TallGrass.png" />
-
                     </Grid>
                 </Viewbox>
             </Grid>
