@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "LawnRobot (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "LawnRobot (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
