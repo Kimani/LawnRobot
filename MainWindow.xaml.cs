@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -13,6 +14,7 @@ namespace LawnRobot
     public sealed partial class MainWindow : Window
     {
         public Lawn CurrentLawn { get; set; }
+        public ICollectionView LawnSquaresView { get; private set; }
 
         public MainWindow()
         {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using Windows.ApplicationModel.Activation;
 
 namespace LawnRobot
 {
@@ -12,12 +11,22 @@ namespace LawnRobot
         Unvisited,
     }
 
+    public class LawnNode
+    {
+        public LawnNode Up     { get; private set; }
+        public LawnNode Down   { get; private set; }
+        public LawnNode Left   { get; private set; }
+        public LawnNode Right  { get; private set; }
+        public Lawn     Parent { get; private set; }
+    }
+
     public class Lawn
     {
         public static readonly int LAWN_COLUMN_COUNT = 15;
         public static readonly int LAWN_ROW_COUNT = 10;
 
         private LawnType[,] LawnData = new LawnType[LAWN_COLUMN_COUNT, LAWN_ROW_COUNT];
+        private LawnNode[,] LawnNodes = new LawnNode[LAWN_COLUMN_COUNT+2, LAWN_ROW_COUNT+2]; // Additional to represent beyond the edges. Mind the indicies!
 
         public Lawn()
         {
@@ -30,9 +39,14 @@ namespace LawnRobot
             }
         }
 
-        public void SetLawnNode(int x, int y, LawnType type)
+        public void SetLawnNodeType(int x, int y, LawnType type)
         {
             LawnData[x,y] = type;
+        }
+
+        public void InitializeNodes()
+        {
+
         }
     }
 
@@ -112,6 +126,8 @@ namespace LawnRobot
                     }
                 }
             }
+
+            lawn.InitializeNodes();
             return lawn;
         }
 
