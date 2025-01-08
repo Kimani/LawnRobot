@@ -32,12 +32,13 @@
                     <ItemsControl
                         Width="300"
                         Height="200"
-                        Margin="10">
+                        Margin="10"
+                        ItemsSource="{x:Bind LawnSquaresView}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate >
                                 <Image
-                                    Grid.Row="4"
-                                    Grid.Column="1"
+                                    Grid.Row="{Binding X}"
+                                    Grid.Column="{Binding Y}"
                                     Source="ms-appx:///Assets/TallGrass.png" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
