@@ -12,16 +12,72 @@ namespace LawnRobot.Model
         Unvisited,
     }
 
+    public enum LawnDisplayType
+    {
+        Empty,
+        TallGrass,
+        ShortGrass,
+        FenceHorizontal,
+        FenceVertical,
+        FenceEndUp,
+        FenceEndLeft,
+        FenceEndRight,
+        FenceEndDown,
+        FenceCornerUpLeft,
+        FenceCornerUpRight,
+        FenceCornerDownLeft,
+        FenceCornerDownRight,
+        FenceTNoUp,
+        FenceTNoLeft,
+        FenceTNoRight,
+        FenceTNoDown,
+    }
+
     public class LawnNode
     {
-        public   LawnNode Up     { get; internal set; }
-        public   LawnNode Down   { get; internal set; }
-        public   LawnNode Left   { get; internal set; }
-        public   LawnNode Right  { get; internal set; }
-        internal Lawn     Parent { get; private set; }
-        internal int      X      { get; private set; }
-        internal int      Y      { get; private set; }
-        internal bool     Edge   { get; private set; }
+        public   LawnNode? Up     { get; internal set; } = null;
+        public   LawnNode? Down   { get; internal set; } = null;
+        public   LawnNode? Left   { get; internal set; } = null;
+        public   LawnNode? Right  { get; internal set; } = null;
+        internal Lawn      Parent { get; private set; }
+        internal int       X      { get; private set; }
+        internal int       Y      { get; private set; }
+        internal bool      Edge   { get; private set; }
+        internal bool      Fence  { get; private set; }
+
+        public LawnDisplayType DisplayType
+        {
+            get
+            {
+                if (Fence)
+                {
+                    bool upFence   =  (Up != null)    ? Up.Fence : Fence;
+                    bool leftFence  = (Left != null)  ? Left.Fence : Fence;
+                    bool rightFence = (Right != null) ? Right.Fence : Fence;
+                    bool downFence  = (Down != null)  ? Down.Fence : Fence;
+
+                    if (upFence  && !leftFence && !rightFence && !downFence) { return LawnDisplayType.FenceEndUp; }
+                    if (!upFence && leftFence  && !rightFence && !downFence) { return LawnDisplayType.FenceEndLeft; }
+                    if (!upFence && !leftFence && rightFence  && !downFence) { return LawnDisplayType.FenceEndRight; }
+                    if (!upFence && !leftFence && !rightFence && downFence)  { return LawnDisplayType.FenceEndDown; }
+                    if (upFence  && !leftFence && !rightFence && downFence)  { return LawnDisplayType.FenceVertical; }
+                    if (!upFence && leftFence  && rightFence  && !downFence) { return LawnDisplayType.FenceHorizontal; }
+                    if (upFence  && leftFence && !rightFence && !downFence)  { return LawnDisplayType.FenceCornerUpLeft; }
+                    if (upFence  && !leftFence && rightFence && !downFence)  { return LawnDisplayType.FenceCornerUpRight; }
+                    if (!upFence && leftFence && !rightFence && downFence)   { return LawnDisplayType.FenceCornerDownLeft; }
+                    if (!upFence && !leftFence && rightFence && downFence)   { return LawnDisplayType.FenceCornerDownRight; }
+                    if (!upFence && leftFence && rightFence && downFence)    { return LawnDisplayType.FenceTNoUp; }
+                    if (upFence && !leftFence && rightFence && downFence)    { return LawnDisplayType.FenceTNoLeft; }
+                    if (upFence && leftFence && !rightFence && downFence)    { return LawnDisplayType.FenceTNoRight; }
+                    if (upFence && leftFence && rightFence && !downFence)    { return LawnDisplayType.FenceTNoDown; }
+                }
+                else if (Parent.GetBaseLawnNodeType(X, Y) == LawnType.TallGrass)
+                {
+                    return _Mowed ? LawnDisplayType.TallGrass : LawnDisplayType.ShortGrass;
+                }
+                return LawnDisplayType.Empty;
+            }
+        }
 
         public LawnType Type
         {

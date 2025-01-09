@@ -56,7 +56,7 @@ namespace LawnRobot
             args.DrawingSession.DrawImage(tile);
         }
 
-        private async void EnsureResources()
+        private void EnsureResources()
         {
             if (ImageUri != null && (_CanvasBitmap == null || _Dirty))
             {

@@ -7,10 +7,22 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:LawnRobot"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:view="using:LawnRobot.View"
+    xmlns:viewmodel="using:LawnRobot.ViewModel"
     Title="Hannah Zamora's Lawn Robot Solver"
     mc:Ignorable="d">
 
-    <Grid Background="#5B3918">
+    <Grid
+        x:Name="RootGrid"
+        Background="#5B3918"
+        Loaded="OnRootGridLoaded">
+        <Grid.Resources>
+            <view:GridIndexToCanvasConverter
+                x:Name="GridToCanvas"
+                GridSpan="20"
+                GridStart="-1" />
+        </Grid.Resources>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="100" />
@@ -30,52 +42,22 @@
                 <local:TiledImageControl Grid.RowSpan="2" ImageUri="ms-appx:///Assets/BaseGrass.png" />
                 <Viewbox UseLayoutRounding="True">
                     <ItemsControl
-                        Width="300"
-                        Height="200"
+                        Width="340"
+                        Height="240"
                         Margin="10"
-                        ItemsSource="{x:Bind LawnSquaresView}">
+                        ItemsSource="{x:Bind LawnSquaresView, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate >
+                            <DataTemplate x:DataType="viewmodel:LawnNodeViewModel">
                                 <Image
-                                    Grid.Row="{Binding X}"
-                                    Grid.Column="{Binding Y}"
+                                    Width="20"
+                                    Height="20"
+                                    Loaded="OnTileLoaded"
                                     Source="ms-appx:///Assets/TallGrass.png" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="20" />
-                                        <RowDefinition Height="20" />
-                                        <RowDefinition Height="20" />
-                                        <RowDefinition Height="20" />
-                                        <RowDefinition Height="20" />
-                                        <RowDefinition Height="20" />
-                                        <RowDefinition Height="20" />
-                                        <RowDefinition Height="20" />
-                                        <RowDefinition Height="20" />
-                                        <RowDefinition Height="20" />
-                                    </Grid.RowDefinitions>
-
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="20" />
-                                    </Grid.ColumnDefinitions>
-                                </Grid>
+                                <Canvas />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
