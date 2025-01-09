@@ -43,6 +43,18 @@ When it comes to finding a path from one node to another, we can take this appro
 - Continue this process until we push a node colored [0] onto the stack.
 - The stack now holds the path we must travel.
 
+We also randomly generate a lawn at the beginning of this simulation. This is done by:
+- Define a maximally defined grid (in this case, 15x10) that is the max size of our lawn, each node initialized to 'Obstacle'.
+- Considering a random internal pixel of a maximally defined grid (in this case, 15x10).
+- Generate 20 values multiplier_i from 0.5 to 1.0
+- Blur/smooth out the multiplier array by applying a [1/5, 1/5, 1/5, 1/5, 1/5] kernel to each 'pixel' of this 1D array.
+- Calculate 20 rays from the internal pixel from the first step extending outward to the outer permiter of the grid at 2*pi/20 radians apart.
+- Multiple each ray_i by multiplier_i.
+- Produce a mesh of triangles that represents the entire shape produced by the endpoints of these rays.
+- For each grid element of the lawn that lies within the mesh, mark it as 'Grass'. This is done by testing it against every triangle produced by two adjacent ray endpoints and the center point.
+
+I had this approach in mind as being fairly simple, and once I got it all working it generates pretty decent lawns!
+
 ## Results
 I had time to develop much of this application, and got everything working with the exception of the solver. That was the most interesting part of this application, but I didn't quite finish that part. It can be seen in isolation in LawnSolver.cs. The rest of the solution took some time, as I did a lot of work here with WinUI3 which didn't want to cooperate. I also spent a good amount of time on the visual style of the application, which didn't get exactly the level of polish I was hoping yet. In time I may revisit this project and fully complete it end to end.
 
