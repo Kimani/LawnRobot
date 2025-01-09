@@ -1,18 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Xml.Serialization;
 
 namespace LawnRobot.Model
 {
-    public enum LawnType
-    {
-        TallGrass,
-        ShortGrass,
-        Obstacle,
-        Unvisited,
-    }
-
     public enum LawnDisplayType
     {
         Empty,
@@ -45,7 +36,7 @@ namespace LawnRobot.Model
         public   int        Y       { get; private set; }
         internal bool       Edge    { get; private set; }
         public   bool       Fence   { get; set; }
-        internal bool       IsGrass { get => Parent.GetBaseLawnNodeType(X, Y) == LawnType.TallGrass; }
+        internal bool       IsGrass { get => Parent.GetBaseLawnNodeType(X, Y) == LawnNodeType.TallGrass; }
 
         public event Action GrassChanged;
 
@@ -75,7 +66,7 @@ namespace LawnRobot.Model
                     if (upFence && leftFence && !rightFence && downFence)    { return LawnDisplayType.FenceTNoRight; }
                     if (upFence && leftFence && rightFence && !downFence)    { return LawnDisplayType.FenceTNoDown; }
                 }
-                else if (Parent.GetBaseLawnNodeType(X, Y) == LawnType.TallGrass)
+                else if (Parent.GetBaseLawnNodeType(X, Y) == LawnNodeType.TallGrass)
                 {
                     return _Mowed ? LawnDisplayType.ShortGrass : LawnDisplayType.TallGrass;
                 }
@@ -83,27 +74,25 @@ namespace LawnRobot.Model
             }
         }
 
-        public LawnType Type
+        public LawnNodeType Type
         {
             get
             {
-                if (Edge || Parent.GetBaseLawnNodeType(X, Y) == LawnType.Obstacle)
+                if (Edge || Parent.GetBaseLawnNodeType(X, Y) == LawnNodeType.Obstacle)
                 {
-                    return LawnType.Obstacle;
+                    return LawnNodeType.Obstacle;
                 }
                 if (_Mowed)
                 {
-                    return LawnType.ShortGrass;
+                    return LawnNodeType.ShortGrass;
                 }
                 if (!_Visited)
                 {
-                    return LawnType.Unvisited;
+                    return LawnNodeType.Unvisited;
                 }
-                return LawnType.TallGrass;
+                return LawnNodeType.TallGrass;
             }
         }
-
-        public LawnNodeType NodeType => throw new NotImplementedException();
 
         private bool _Mowed = false;
         private bool _Visited = false;
@@ -116,9 +105,14 @@ namespace LawnRobot.Model
             Y = y;
         }
 
+        public void SetVisited()
+        {
+            _Visited = true;
+        }
+
         public void Mow()
         {
-            if (Type == LawnType.TallGrass)
+            if (Type == LawnNodeType.TallGrass)
             {
                 _Mowed = true;
                 GrassChanged?.Invoke();
@@ -131,7 +125,7 @@ namespace LawnRobot.Model
         public static readonly int LAWN_COLUMN_COUNT = 15;
         public static readonly int LAWN_ROW_COUNT = 10;
 
-        private LawnType[,] LawnData = new LawnType[LAWN_COLUMN_COUNT, LAWN_ROW_COUNT];
+        private LawnNodeType[,] LawnData = new LawnNodeType[LAWN_COLUMN_COUNT, LAWN_ROW_COUNT];
         private LawnNode[,] LawnNodes = new LawnNode[LAWN_COLUMN_COUNT + 2, LAWN_ROW_COUNT + 2]; // Additional to represent beyond the edges. Mind the indicies!
 
         public Lawn()
@@ -140,21 +134,21 @@ namespace LawnRobot.Model
             {
                 for (int j = 0; j < LAWN_ROW_COUNT; j++)
                 {
-                    LawnData[i, j] = LawnType.Obstacle;
+                    LawnData[i, j] = LawnNodeType.Obstacle;
                 }
             }
         }
 
-        public LawnType GetBaseLawnNodeType(int x, int y)
+        public LawnNodeType GetBaseLawnNodeType(int x, int y)
         {
             if (x < 0 || y < 0 || x >= LAWN_COLUMN_COUNT || y >= LAWN_ROW_COUNT)
             {
-                return LawnType.Obstacle;
+                return LawnNodeType.Obstacle;
             }
             return LawnData[x, y];
         }
 
-        public void SetLawnNodeType(int x, int y, LawnType type)
+        public void SetLawnNodeType(int x, int y, LawnNodeType type)
         {
             LawnData[x, y] = type;
         }
@@ -241,12 +235,26 @@ namespace LawnRobot.Model
             var nodeList = new List<LawnNode>();
             foreach (LawnNode node in LawnNodes)
             {
-                if ((!node.Edge && GetBaseLawnNodeType(node.X, node.Y) != LawnType.Obstacle) || node.Fence)
+                if ((!node.Edge && GetBaseLawnNodeType(node.X, node.Y) != LawnNodeType.Obstacle) || node.Fence)
                 {
                     nodeList.Add(node);
                 }
             }
             return nodeList;
+        }
+
+        public bool HasAnyTallGrass()
+        {
+            // A faster way to do this would be to keep track of the current
+            // count of TallGrass nodes, which gets decremented as we mow the lawn.
+            foreach (LawnNode node in LawnNodes)
+            {
+                if (node.Type == LawnNodeType.TallGrass)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public LawnNode GetLawnStartNode()
@@ -255,14 +263,16 @@ namespace LawnRobot.Model
             var nodeList = new List<LawnNode>();
             foreach (LawnNode node in LawnNodes)
             {
-                if (!node.Edge && GetBaseLawnNodeType(node.X, node.Y) != LawnType.Obstacle)
+                if (!node.Edge && GetBaseLawnNodeType(node.X, node.Y) != LawnNodeType.Obstacle)
                 {
                     nodeList.Add(node);
                 }
             }
 
             Random r = new Random((int)DateTime.Now.Ticks);
-            return nodeList[r.Next(nodeList.Count)];
+            LawnNode startNode = nodeList[r.Next(nodeList.Count)];
+            startNode.SetVisited();
+            return startNode;
         }
     }
 
@@ -337,7 +347,7 @@ namespace LawnRobot.Model
 
                         if (IsPointInTriangle(pointOnLawn, triangle1, triangle2, triangle3))
                         {
-                            lawn.SetLawnNodeType(x, y, LawnType.TallGrass);
+                            lawn.SetLawnNodeType(x, y, LawnNodeType.TallGrass);
                         }
                     }
                 }

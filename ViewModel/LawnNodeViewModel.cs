@@ -1,9 +1,11 @@
 ﻿using LawnRobot.Model;
+using Microsoft.UI.Dispatching;
 using System.ComponentModel;
+using Windows.UI.Core;
 
 namespace LawnRobot.ViewModel
 {
-    internal class LawnNodeViewModel : INotifyPropertyChanged
+    public class LawnNodeViewModel : INotifyPropertyChanged
     {
         public LawnNode        Node           { get; }
         public int             X              { get => Node.X; }
@@ -14,17 +16,23 @@ namespace LawnRobot.ViewModel
         public bool            ShowRightFence { get => ShowRightFenceInner(); }
         public bool            ShowDownFence  { get => ShowDownFenceInner(); }
 
-        public LawnNodeViewModel(LawnNode node)
+        private DispatcherQueue _ParentDispatcher;
+
+        public LawnNodeViewModel(DispatcherQueue parentDispatcher, LawnNode node)
         {
             Node = node;
             Node.GrassChanged += OnNodeGrassChanged;
+            _ParentDispatcher = parentDispatcher;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnNodeGrassChanged()
         {
-            Notify(nameof(DisplayType));
+            _ParentDispatcher.TryEnqueue(() =>
+            {
+                Notify("DisplayType");
+            });
         }
 
         private bool ShowUpFenceInner()

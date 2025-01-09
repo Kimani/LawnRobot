@@ -21,8 +21,7 @@
                 <Image
                     Width="20"
                     Height="20"
-                    Loaded="OnTileLoaded"
-                    Source="ms-appx:///Assets/TallGrass.png" />
+                    Loaded="OnTileLoaded" />
             </DataTemplate>
             <DataTemplate x:Key="FenceTileTemplate">
                 <Grid
@@ -38,6 +37,10 @@
                 </Grid>
             </DataTemplate>
 
+            <view:GrassToImageConverter
+                x:Name="GrassToImage"
+                CutGrassSource="ms-appx:///Assets/CutGrass.png"
+                TallGrassSource="ms-appx:///Assets/TallGrass.png" />
             <view:TileTemplateSelector
                 x:Name="LawnToTileSelector"
                 FenceTemplate="{StaticResource FenceTileTemplate}"

@@ -61,7 +61,7 @@ namespace LawnRobot.ViewModel
             // are assigned properties, and you can do extension classes on the enumeration
             // and do something along the lines of MowerDirection.RotateToNext().
             // In the interest of time I'll do this a simpler way.
-            Direction = 
+            Direction =
                 Direction == MowerDirection.Up    ? MowerDirection.Right :
                 Direction == MowerDirection.Right ? MowerDirection.Down :
                 Direction == MowerDirection.Down  ? MowerDirection.Left :

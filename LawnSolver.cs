@@ -22,7 +22,7 @@
         ILawnNode?   Down  { get; }
         ILawnNode?   Left  { get; }
         ILawnNode?   Right { get; }
-        LawnNodeType NodeType  { get; }
+        LawnNodeType Type  { get; }
         int          X     { get; }
         int          Y     { get; }
     }
@@ -50,7 +50,7 @@
         {
             // Mow where we are at if we can.
             ILawnNode currentLocation = _Mower.Location;
-            if (currentLocation.NodeType == LawnNodeType.TallGrass)
+            if (currentLocation.Type == LawnNodeType.TallGrass)
             {
                 _Mower.Mow();
                 return;
