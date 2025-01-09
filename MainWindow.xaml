@@ -72,19 +72,29 @@
             <Grid>
                 <local:TiledImageControl Grid.RowSpan="2" ImageUri="ms-appx:///Assets/BaseGrass.png" />
                 <Viewbox UseLayoutRounding="True">
-                    <ItemsControl
+                    <Grid
                         Width="340"
                         Height="240"
-                        Margin="10"
-                        ItemTemplateSelector="{StaticResource LawnToTileSelector}"
-                        ItemsSource="{x:Bind LawnSquaresView, Mode=OneWay}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
-
+                        Margin="10">
+                        <ItemsControl ItemTemplateSelector="{StaticResource LawnToTileSelector}" ItemsSource="{x:Bind LawnSquaresView, Mode=OneWay}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                        <Canvas x:Name="MowerCanvas">
+                            <Grid
+                                x:Name="MowerElement"
+                                Canvas.Left="{Binding LocationX, Converter={StaticResource GridToCanvasX}}"
+                                Canvas.Top="{Binding LocationY, Converter={StaticResource GridToCanvasY}}">
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    Source="ms-appx:///Assets/MowerUp.png" />
+                            </Grid>
+                        </Canvas>
+                    </Grid>
                 </Viewbox>
             </Grid>
         </Border>

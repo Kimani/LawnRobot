@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Xml.Serialization;
 
 namespace LawnRobot.Model
 {
@@ -33,18 +34,20 @@ namespace LawnRobot.Model
         FenceTNoDown,
     }
 
-    public class LawnNode
+    public class LawnNode : ILawnNode
     {
-        public   LawnNode? Up     { get; internal set; } = null;
-        public   LawnNode? Down   { get; internal set; } = null;
-        public   LawnNode? Left   { get; internal set; } = null;
-        public   LawnNode? Right  { get; internal set; } = null;
-        internal Lawn      Parent { get; private set; }
-        internal int       X      { get; private set; }
-        internal int       Y      { get; private set; }
-        internal bool      Edge   { get; private set; }
-        internal bool      Fence  { get; set; }
-        internal bool      IsGrass { get => Parent.GetBaseLawnNodeType(X, Y) == LawnType.TallGrass; }
+        public   ILawnNode? Up      { get; internal set; } = null;
+        public   ILawnNode? Down    { get; internal set; } = null;
+        public   ILawnNode? Left    { get; internal set; } = null;
+        public   ILawnNode? Right   { get; internal set; } = null;
+        internal Lawn       Parent  { get; private set; }
+        public   int        X       { get; private set; }
+        public   int        Y       { get; private set; }
+        internal bool       Edge    { get; private set; }
+        public   bool       Fence   { get; set; }
+        internal bool       IsGrass { get => Parent.GetBaseLawnNodeType(X, Y) == LawnType.TallGrass; }
+
+        public event Action GrassChanged;
 
         public LawnDisplayType DisplayType
         {
@@ -52,10 +55,10 @@ namespace LawnRobot.Model
             {
                 if (Fence)
                 {
-                    bool upFence   =  (Up != null)    ? Up.Fence : false;
-                    bool leftFence  = (Left != null)  ? Left.Fence : false;
-                    bool rightFence = (Right != null) ? Right.Fence : false;
-                    bool downFence  = (Down != null)  ? Down.Fence : false;
+                    bool upFence   =  (Up != null)    ? ((LawnNode)Up).Fence : false;
+                    bool leftFence  = (Left != null)  ? ((LawnNode)Left).Fence : false;
+                    bool rightFence = (Right != null) ? ((LawnNode)Right).Fence : false;
+                    bool downFence  = (Down != null)  ? ((LawnNode)Down).Fence : false;
 
                     if (upFence  && !leftFence && !rightFence && !downFence) { return LawnDisplayType.FenceEndUp; }
                     if (!upFence && leftFence  && !rightFence && !downFence) { return LawnDisplayType.FenceEndLeft; }
@@ -100,6 +103,8 @@ namespace LawnRobot.Model
             }
         }
 
+        public LawnNodeType NodeType => throw new NotImplementedException();
+
         private bool _Mowed = false;
         private bool _Visited = false;
 
@@ -109,6 +114,15 @@ namespace LawnRobot.Model
             Edge = edge;
             X = x;
             Y = y;
+        }
+
+        public void Mow()
+        {
+            if (Type == LawnType.TallGrass)
+            {
+                _Mowed = true;
+                GrassChanged?.Invoke();
+            }
         }
     }
 
@@ -233,6 +247,22 @@ namespace LawnRobot.Model
                 }
             }
             return nodeList;
+        }
+
+        public LawnNode GetLawnStartNode()
+        {
+            // Quick answer here, just grab them all and then a random one.
+            var nodeList = new List<LawnNode>();
+            foreach (LawnNode node in LawnNodes)
+            {
+                if (!node.Edge && GetBaseLawnNodeType(node.X, node.Y) != LawnType.Obstacle)
+                {
+                    nodeList.Add(node);
+                }
+            }
+
+            Random r = new Random((int)DateTime.Now.Ticks);
+            return nodeList[r.Next(nodeList.Count)];
         }
     }
 

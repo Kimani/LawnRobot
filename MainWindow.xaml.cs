@@ -6,15 +6,30 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.Metrics;
 
 namespace LawnRobot
 {
     public sealed partial class MainWindow : Window, INotifyPropertyChanged
     {
         public ICollectionView? LawnSquaresView { get => _LawnNodesSource?.View; }
+        public LawnMower? Mower
+        {
+            get => _Mower;
+            set
+            {
+                if (_Mower != value)
+                {
+                    _Mower = value;
+                    Notify("Mower");
+                }
+            }
+        }
 
         private Lawn? _CurrentLawn;
         private CollectionViewSource? _LawnNodesSource;
+        private LawnSolver? _Solver;
+        private LawnMower? _Mower;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -36,6 +51,12 @@ namespace LawnRobot
 
             _LawnNodesSource = new CollectionViewSource() { Source = nodeViewModels }; ;
             Notify("LawnSquaresView");
+
+            // Setup the Mower and the Solver.
+            LawnNode startNode = _CurrentLawn.GetLawnStartNode();
+            Mower = new LawnMower(startNode);
+            MowerElement.DataContext = Mower;
+            _Solver = new LawnSolver(Mower);
         }
 
         private void OnRandomizeClicked(object sender, RoutedEventArgs args)
@@ -80,7 +101,7 @@ namespace LawnRobot
 
         private void OnRootGridLoaded(object sender, RoutedEventArgs e)
         {
-            //Window.Current.AppWindow.Resize(new SizeInt32(1000, 750));
+            // Window.Current.AppWindow.Resize(new SizeInt32(850, 725));
             RefreshLawn();
         }
     }

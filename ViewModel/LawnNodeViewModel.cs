@@ -1,8 +1,9 @@
 ﻿using LawnRobot.Model;
+using System.ComponentModel;
 
 namespace LawnRobot.ViewModel
 {
-    internal class LawnNodeViewModel
+    internal class LawnNodeViewModel : INotifyPropertyChanged
     {
         public LawnNode        Node           { get; }
         public int             X              { get => Node.X; }
@@ -16,6 +17,14 @@ namespace LawnRobot.ViewModel
         public LawnNodeViewModel(LawnNode node)
         {
             Node = node;
+            Node.GrassChanged += OnNodeGrassChanged;
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnNodeGrassChanged()
+        {
+            Notify(nameof(DisplayType));
         }
 
         private bool ShowUpFenceInner()
@@ -68,6 +77,11 @@ namespace LawnRobot.ViewModel
                 (displayType == LawnDisplayType.FenceTNoUp) ||
                 (displayType == LawnDisplayType.FenceTNoLeft) ||
                 (displayType == LawnDisplayType.FenceTNoRight);
+        }
+
+        private void Notify(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
