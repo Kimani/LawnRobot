@@ -55,6 +55,8 @@
                 _Mower.Mow();
                 return;
             }
+
+            // If we don't have a path to traverse, generate one to the next node.
         }
     }
 }
