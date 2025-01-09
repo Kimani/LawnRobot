@@ -27,7 +27,7 @@ namespace LawnRobot
         {
             _CurrentLawn = LawnGenerator.BuildLawn();
 
-            List<LawnNode> grassNodes = _CurrentLawn.GetGrassNodes();
+            List<LawnNode> grassNodes = _CurrentLawn.GetLawnNodes();
             var nodeViewModels = new List<LawnNodeViewModel>();
             foreach (LawnNode node in grassNodes)
             {
@@ -51,17 +51,15 @@ namespace LawnRobot
 
         private void OnTileLoaded(object sender, RoutedEventArgs e)
         {
-            if ((sender is Image image) &&
-                (VisualTreeHelper.GetParent(image) is ContentPresenter presenter) &&
-                (image.DataContext is LawnNodeViewModel viewModel))
+            if ((sender is FrameworkElement element) &&
+                (VisualTreeHelper.GetParent(element) is ContentPresenter presenter) &&
+                (element.DataContext is LawnNodeViewModel viewModel))
             {
-                var converter = (IValueConverter)RootGrid.Resources["GridToCanvas"];
-
                 Binding topBinding = new Binding
                 {
                     Path = new PropertyPath("Y"),
                     Source = viewModel,
-                    Converter = converter,
+                    Converter = (IValueConverter)RootGrid.Resources["GridToCanvasY"],
                 };
                 BindingOperations.SetBinding(presenter, Canvas.TopProperty, topBinding);
 
@@ -69,7 +67,7 @@ namespace LawnRobot
                 {
                     Path = new PropertyPath("X"),
                     Source = viewModel,
-                    Converter = converter,
+                    Converter = (IValueConverter)RootGrid.Resources["GridToCanvasX"],
                 };
                 BindingOperations.SetBinding(presenter, Canvas.LeftProperty, leftBinding);
             }

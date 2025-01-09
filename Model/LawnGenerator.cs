@@ -43,7 +43,8 @@ namespace LawnRobot.Model
         internal int       X      { get; private set; }
         internal int       Y      { get; private set; }
         internal bool      Edge   { get; private set; }
-        internal bool      Fence  { get; private set; }
+        internal bool      Fence  { get; set; }
+        internal bool      IsGrass { get => Parent.GetBaseLawnNodeType(X, Y) == LawnType.TallGrass; }
 
         public LawnDisplayType DisplayType
         {
@@ -51,10 +52,10 @@ namespace LawnRobot.Model
             {
                 if (Fence)
                 {
-                    bool upFence   =  (Up != null)    ? Up.Fence : Fence;
-                    bool leftFence  = (Left != null)  ? Left.Fence : Fence;
-                    bool rightFence = (Right != null) ? Right.Fence : Fence;
-                    bool downFence  = (Down != null)  ? Down.Fence : Fence;
+                    bool upFence   =  (Up != null)    ? Up.Fence : false;
+                    bool leftFence  = (Left != null)  ? Left.Fence : false;
+                    bool rightFence = (Right != null) ? Right.Fence : false;
+                    bool downFence  = (Down != null)  ? Down.Fence : false;
 
                     if (upFence  && !leftFence && !rightFence && !downFence) { return LawnDisplayType.FenceEndUp; }
                     if (!upFence && leftFence  && !rightFence && !downFence) { return LawnDisplayType.FenceEndLeft; }
@@ -73,7 +74,7 @@ namespace LawnRobot.Model
                 }
                 else if (Parent.GetBaseLawnNodeType(X, Y) == LawnType.TallGrass)
                 {
-                    return _Mowed ? LawnDisplayType.TallGrass : LawnDisplayType.ShortGrass;
+                    return _Mowed ? LawnDisplayType.ShortGrass : LawnDisplayType.TallGrass;
                 }
                 return LawnDisplayType.Empty;
             }
@@ -132,6 +133,10 @@ namespace LawnRobot.Model
 
         public LawnType GetBaseLawnNodeType(int x, int y)
         {
+            if (x < 0 || y < 0 || x >= LAWN_COLUMN_COUNT || y >= LAWN_ROW_COUNT)
+            {
+                return LawnType.Obstacle;
+            }
             return LawnData[x, y];
         }
 
@@ -147,7 +152,7 @@ namespace LawnRobot.Model
                 for (int j = 0; j < LAWN_ROW_COUNT + 2; j++)
                 {
                     bool isEdge = i == 0 || j == 0 || i == LAWN_COLUMN_COUNT + 1 || j == LAWN_ROW_COUNT + 1;
-                    LawnNodes[i, j] = new LawnNode(this, isEdge, i - 1, j - 1); // NO., M?IND ?THE INCCIDIES
+                    LawnNodes[i, j] = new LawnNode(this, isEdge, i - 1, j - 1);
                 }
             }
 
@@ -174,14 +179,55 @@ namespace LawnRobot.Model
                     }
                 }
             }
+
+            Tuple<int, int>[] allDirectionsOffset = new Tuple<int, int>[]
+            {
+                new Tuple<int,int>(-1, -1),
+                new Tuple<int,int>(-1, 0),
+                new Tuple<int,int>(-1, 1),
+                new Tuple<int,int>(0, 1),
+                new Tuple<int,int>(0, -1),
+                new Tuple<int,int>(1, -1),
+                new Tuple<int,int>(1, 0),
+                new Tuple<int,int>(1, 1),
+            };
+
+            for (int i = 0; i < LAWN_COLUMN_COUNT + 2; i++)
+            {
+                for (int j = 0; j < LAWN_ROW_COUNT + 2; j++)
+                {
+                    LawnNode currentNode = LawnNodes[i, j];
+                    if (currentNode.IsGrass)
+                    {
+                        foreach (Tuple<int, int> offset in allDirectionsOffset)
+                        {
+                            Initialize_TryToSetAsFence(i + offset.Item1, j + offset.Item2);
+                        }
+                    }
+                }
+            }
         }
 
-        public List<LawnNode> GetGrassNodes()
+        public void Initialize_TryToSetAsFence(int i, int j)
+        {
+            if ((i < 0) || (j < 0) || (i >= LAWN_COLUMN_COUNT + 2) || (j >= LAWN_ROW_COUNT + 2))
+            {
+                return;
+            }
+
+            LawnNode currentNode = LawnNodes[i, j];
+            if (!currentNode.IsGrass)
+            {
+                currentNode.Fence = true;
+            }
+        }
+
+        public List<LawnNode> GetLawnNodes()
         {
             var nodeList = new List<LawnNode>();
             foreach (LawnNode node in LawnNodes)
             {
-                if (!node.Edge && GetBaseLawnNodeType(node.X, node.Y) != LawnType.Obstacle)
+                if ((!node.Edge && GetBaseLawnNodeType(node.X, node.Y) != LawnType.Obstacle) || node.Fence)
                 {
                     nodeList.Add(node);
                 }

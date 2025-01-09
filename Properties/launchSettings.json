@@ -1,7 +1,8 @@
 {
   "profiles": {
     "LawnRobot (Package)": {
-      "commandName": "MsixPackage"
+      "commandName": "MsixPackage",
+      "nativeDebugging": true
     },
     "LawnRobot (Unpackaged)": {
       "commandName": "Project"

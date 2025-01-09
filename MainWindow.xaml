@@ -17,10 +17,41 @@
         Background="#5B3918"
         Loaded="OnRootGridLoaded">
         <Grid.Resources>
+            <DataTemplate x:Key="GrassTileTemplate">
+                <Image
+                    Width="20"
+                    Height="20"
+                    Loaded="OnTileLoaded"
+                    Source="ms-appx:///Assets/TallGrass.png" />
+            </DataTemplate>
+            <DataTemplate x:Key="FenceTileTemplate">
+                <Grid
+                    Width="20"
+                    Height="20"
+                    Loaded="OnTileLoaded">
+                    <Image Source="ms-appx:///Assets/CutGrass.png" />
+                    <Image Source="ms-appx:///Assets/FenceCenter.png" />
+                    <Image Source="ms-appx:///Assets/FenceUp.png" Visibility="{Binding ShowUpFence, Converter={StaticResource BoolToVis}}" />
+                    <Image Source="ms-appx:///Assets/FenceDown.png" Visibility="{Binding ShowDownFence, Converter={StaticResource BoolToVis}}" />
+                    <Image Source="ms-appx:///Assets/FenceLeft.png" Visibility="{Binding ShowLeftFence, Converter={StaticResource BoolToVis}}" />
+                    <Image Source="ms-appx:///Assets/FenceRight.png" Visibility="{Binding ShowRightFence, Converter={StaticResource BoolToVis}}" />
+                </Grid>
+            </DataTemplate>
+
+            <view:TileTemplateSelector
+                x:Name="LawnToTileSelector"
+                FenceTemplate="{StaticResource FenceTileTemplate}"
+                GrassTemplate="{StaticResource GrassTileTemplate}" />
             <view:GridIndexToCanvasConverter
-                x:Name="GridToCanvas"
+                x:Name="GridToCanvasX"
                 GridSpan="20"
                 GridStart="-1" />
+            <view:GridIndexToCanvasConverter
+                x:Name="GridToCanvasY"
+                GridMirrorHeight="240"
+                GridSpan="20"
+                GridStart="-1" />
+            <view:BoolToVisibilityConverter x:Name="BoolToVis" />
         </Grid.Resources>
 
         <Grid.RowDefinitions>
@@ -45,16 +76,8 @@
                         Width="340"
                         Height="240"
                         Margin="10"
+                        ItemTemplateSelector="{StaticResource LawnToTileSelector}"
                         ItemsSource="{x:Bind LawnSquaresView, Mode=OneWay}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="viewmodel:LawnNodeViewModel">
-                                <Image
-                                    Width="20"
-                                    Height="20"
-                                    Loaded="OnTileLoaded"
-                                    Source="ms-appx:///Assets/TallGrass.png" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <Canvas />
